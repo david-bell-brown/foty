@@ -65,13 +65,8 @@ const mockItems = [
 ];
 
 export default async function HomePage() {
-  const posts = await db.query.posts.findMany();
-  console.log(posts);
   return (
     <div className="flex flex-1 flex-col gap-4">
-      {posts.map((post) => (
-        <div key={post.id}>{post.name}</div>
-      ))}
       <div className="relative flex-1">
         <div className="absolute inset-0 flex w-full snap-x snap-mandatory overflow-x-auto md:flex-col">
           {mockCategories.map((category) => (
