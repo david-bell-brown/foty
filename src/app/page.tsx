@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { db } from "~/server/db";
 
 const mockCategories = [
   {
@@ -61,29 +62,36 @@ const mockItems = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const posts = await db.query.posts.findMany();
+  console.log(posts);
   return (
-    <div className="relative flex-1">
-      <div className="absolute inset-0 flex w-full snap-x snap-mandatory overflow-x-auto md:flex-col">
-        {mockCategories.map((category) => (
-          <div
-            key={category.id}
-            className="flex w-full shrink-0 snap-center p-2"
-          >
-            <Card key={category.id} className="w-full">
-              <CardHeader>
-                <CardTitle>{category.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-4">
-                  {mockItems.map((item) => (
-                    <div key={item.id}>{item.name}</div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ))}
+    <div className="flex flex-1 flex-col gap-4">
+      {posts.map((post) => (
+        <div key={post.id}>{post.name}</div>
+      ))}
+      <div className="relative flex-1">
+        <div className="absolute inset-0 flex w-full snap-x snap-mandatory overflow-x-auto md:flex-col">
+          {mockCategories.map((category) => (
+            <div
+              key={category.id}
+              className="flex w-full shrink-0 snap-center p-2"
+            >
+              <Card key={category.id} className="w-full">
+                <CardHeader>
+                  <CardTitle>{category.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4">
+                    {mockItems.map((item) => (
+                      <div key={item.id}>{item.name}</div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
