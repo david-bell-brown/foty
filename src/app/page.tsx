@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { db } from "~/server/db";
 
+export const dynamic = "force-dynamic";
+
 const mockCategories = [
   {
     id: 1,
