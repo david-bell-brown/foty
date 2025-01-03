@@ -6,7 +6,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  // SidebarHeader,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -32,7 +32,12 @@ export function AppSidebar() {
       description="Created lists navigation menu"
       side="right"
     >
-      {/* <SidebarHeader></SidebarHeader> */}
+      <SidebarHeader>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xl">Foty</span>
+          <span>avatar</span>
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Lists</SidebarGroupLabel>
