@@ -50,7 +50,7 @@ export const rankingCategories = createTable(
       .references(() => projects.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 256 }).notNull(),
     description: text("description"),
-    orderIndex: integer("order_index").notNull(),
+    orderIndex: integer("order_index").default(0).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),

@@ -3,9 +3,10 @@
 ## TODO
 
 - [x] basic ui for multiple sortable lists
-- [ ] set up db
-- [ ] attach db
+- [x] set up db
+- [x] attach db
 - [ ] add auth
+- [ ] user project id sub route
 - [ ] create category
 - [ ] error management
 - [ ] add item
