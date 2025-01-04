@@ -2,7 +2,7 @@ import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
-import Nav from "./_components/nav";
+import Nav from "../components/nav";
 
 export const metadata: Metadata = {
   title: "Foty",
