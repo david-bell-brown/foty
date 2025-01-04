@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { items, projects, rankingCategories } from "~/server/db/schema";
+import { projects, rankingCategories } from "~/server/db/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Breadcrumb,
@@ -14,6 +14,8 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import { Edit } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { ProjectDrawer } from "~/components/project-drawer";
 
 export default async function ProjectPage({
   params,
@@ -29,20 +31,17 @@ export default async function ProjectPage({
 
   const project = await db.query.projects.findFirst({
     where: eq(projects.id, id),
+    with: {
+      rankingCategories: {
+        orderBy: rankingCategories.orderIndex,
+      },
+      items: {},
+    },
   });
 
   if (!project) {
     return notFound();
   }
-
-  const categories = await db.query.rankingCategories.findMany({
-    where: eq(rankingCategories.projectId, id),
-    orderBy: rankingCategories.orderIndex,
-  });
-
-  const projectItems = await db.query.items.findMany({
-    where: eq(items.projectId, id),
-  });
 
   return (
     <div className="flex flex-1 flex-col gap-1">
@@ -60,18 +59,23 @@ export default async function ProjectPage({
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <span className="flex items-center gap-2 text-sm text-primary">
-          <Edit className="size-4" />
-          <span>Edit project</span>
-        </span>
+        <ProjectDrawer
+          project={{ ...project, categories: project.rankingCategories }}
+          trigger={
+            <Button variant="ghost" className="gap-2">
+              <Edit className="h-4 w-4" />
+              Edit project
+            </Button>
+          }
+        />
       </div>
 
       <div className="relative flex-1">
-        <div className="absolute inset-0 flex w-full snap-x snap-mandatory overflow-x-auto md:flex-col">
-          {categories.map((category) => (
+        <div className="absolute inset-0 flex w-full snap-x snap-mandatory overflow-x-auto">
+          {project.rankingCategories.map((category) => (
             <div
               key={category.id}
-              className="flex w-full shrink-0 snap-center p-2"
+              className="flex w-full shrink-0 snap-start p-2 md:w-6/12"
             >
               <Card key={category.id} className="w-full">
                 <CardHeader>
@@ -79,7 +83,7 @@ export default async function ProjectPage({
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col gap-3">
-                    {projectItems.map((item) => (
+                    {project.items.map((item) => (
                       <div
                         key={item.id}
                         className="mx-[-.75rem] rounded-lg bg-secondary px-3 py-2"

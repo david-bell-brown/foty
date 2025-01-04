@@ -22,99 +22,6 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `foty_${name}`);
 
-// Projects table
-export const projects = createTable(
-  "project",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    name: varchar("name", { length: 256 }).notNull(),
-    description: text("description"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (table) => ({
-    nameIndex: index("project_name_idx").on(table.name),
-  }),
-);
-
-// Ranking Categories table
-export const rankingCategories = createTable(
-  "ranking_category",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    projectId: uuid("project_id")
-      .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 256 }).notNull(),
-    description: text("description"),
-    orderIndex: integer("order_index").default(0).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (table) => ({
-    projectIdIndex: index("ranking_category_project_id_idx").on(
-      table.projectId,
-    ),
-    nameIndex: index("ranking_category_name_idx").on(table.name),
-  }),
-);
-
-// Items table
-export const items = createTable(
-  "item",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    projectId: uuid("project_id")
-      .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 256 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (table) => ({
-    projectIdIndex: index("item_project_id_idx").on(table.projectId),
-    nameIndex: index("item_name_idx").on(table.name),
-  }),
-);
-
-// ItemRankings table - stores the ranking of items within each category
-export const itemRankings = createTable(
-  "item_ranking",
-  {
-    categoryId: uuid("category_id")
-      .notNull()
-      .references(() => rankingCategories.id, { onDelete: "cascade" }),
-    itemId: uuid("item_id")
-      .notNull()
-      .references(() => items.id, { onDelete: "cascade" }),
-    rank: integer("rank").notNull(),
-    notes: text("notes"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.categoryId, table.itemId] }),
-    categoryIdIndex: index("item_ranking_category_id_idx").on(table.categoryId),
-    itemIdIndex: index("item_ranking_item_id_idx").on(table.itemId),
-  }),
-);
-
 // Auth
 export const users = createTable("user", {
   id: varchar("id", { length: 255 })
@@ -204,3 +111,148 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );
+
+// Projects tables
+export const projects = createTable(
+  "project",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 256 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+  },
+  (table) => ({
+    nameIndex: index("project_name_idx").on(table.name),
+  }),
+);
+export type Project = typeof projects.$inferSelect;
+
+// relations
+export const projectsRelations = relations(projects, ({ many }) => ({
+  rankingCategories: many(rankingCategories),
+  items: many(items),
+}));
+
+// Ranking Categories table
+export const rankingCategories = createTable(
+  "ranking_category",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 256 }).notNull(),
+    orderIndex: integer("order_index").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+  },
+  (table) => ({
+    projectIdIndex: index("ranking_category_project_id_idx").on(
+      table.projectId,
+    ),
+    nameIndex: index("ranking_category_name_idx").on(table.name),
+  }),
+);
+export type RankingCategory = typeof rankingCategories.$inferSelect;
+
+// relations
+export const rankingCategoriesRelations = relations(
+  rankingCategories,
+  ({ one, many }) => ({
+    project: one(projects, {
+      fields: [rankingCategories.projectId],
+      references: [projects.id],
+    }),
+    rankings: many(itemRankings),
+  }),
+);
+
+// Items table
+export const items = createTable(
+  "item",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 256 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+  },
+  (table) => ({
+    projectIdIndex: index("item_project_id_idx").on(table.projectId),
+    nameIndex: index("item_name_idx").on(table.name),
+  }),
+);
+export type Item = typeof items.$inferSelect;
+
+// relations
+export const itemsRelations = relations(items, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [items.projectId],
+    references: [projects.id],
+  }),
+  rankings: many(itemRankings),
+}));
+
+// ItemRankings table - stores the ranking of items within each category
+export const itemRankings = createTable(
+  "item_ranking",
+  {
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => rankingCategories.id, { onDelete: "cascade" }),
+    itemId: uuid("item_id")
+      .notNull()
+      .references(() => items.id, { onDelete: "cascade" }),
+    rank: integer("rank").notNull(),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.categoryId, table.itemId] }),
+    categoryIdIndex: index("item_ranking_category_id_idx").on(table.categoryId),
+    itemIdIndex: index("item_ranking_item_id_idx").on(table.itemId),
+  }),
+);
+export type ItemRanking = typeof itemRankings.$inferSelect;
+
+export const itemRankingsRelations = relations(itemRankings, ({ one }) => ({
+  category: one(rankingCategories, {
+    fields: [itemRankings.categoryId],
+    references: [rankingCategories.id],
+  }),
+  item: one(items, {
+    fields: [itemRankings.itemId],
+    references: [items.id],
+  }),
+}));
