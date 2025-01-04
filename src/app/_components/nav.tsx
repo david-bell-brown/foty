@@ -6,7 +6,7 @@ import { auth } from "~/server/auth";
 export default async function Nav() {
   const session = await auth();
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b p-4">
+    <header className="flex h-16 shrink-0 items-center justify-between gap-2 p-4">
       <Link href="/" className="text-xl">
         Foty
       </Link>
