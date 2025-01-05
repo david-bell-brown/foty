@@ -7,7 +7,7 @@ import { ItemDrawer } from "./item-drawer";
 import { buttonVariants, Button } from "./ui/button";
 import { handleEnd as coreHandleEnd } from "@formkit/drag-and-drop";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { reorderItems } from "~/server/actions/items";
 import { toast } from "sonner";
 
@@ -16,7 +16,7 @@ export default function ItemList({
 }: {
   rankings: (ItemRanking & { item: Item })[];
 }) {
-  const [parentRef, values] = useDragAndDrop<
+  const [parentRef, values, setValues] = useDragAndDrop<
     HTMLDivElement,
     ItemRanking & { item: Item }
   >(rankings, {
@@ -56,6 +56,10 @@ export default function ItemList({
     },
     [],
   );
+
+  useEffect(() => {
+    setValues(rankings);
+  }, [rankings, setValues]);
 
   return (
     <div ref={parentRef} className="flex flex-col gap-3">

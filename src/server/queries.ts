@@ -30,7 +30,10 @@ export async function getProject(id: string) {
             asc(rankingCategories.orderIndex),
           with: {
             rankings: {
-              orderBy: (rankings, { asc }) => asc(rankings.rank),
+              orderBy: (rankings, { asc, desc }) => [
+                asc(rankings.rank),
+                desc(rankings.createdAt),
+              ],
               with: {
                 item: true,
               },
