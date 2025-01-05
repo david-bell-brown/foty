@@ -15,7 +15,6 @@ import {
   DrawerTrigger,
 } from "~/components/ui/drawer";
 import { Input } from "~/components/ui/input";
-// import { Textarea } from "~/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -28,14 +27,13 @@ import { type ItemRanking, type Item } from "~/server/db/schema";
 import { itemFormSchema, type ItemFormValues } from "~/lib/schemas";
 import { createItem, updateItem } from "~/server/actions/items";
 import { Textarea } from "./ui/textarea";
+import { DeleteItem } from "./delete-item";
 
 interface ItemDrawerProps {
   projectId: string;
   categoryId: string;
   itemRanking?: ItemRanking & { item: Item };
-  trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  trigger: React.ReactNode;
 }
 
 export function ItemDrawer({
@@ -74,15 +72,17 @@ export function ItemDrawer({
     <Drawer open={open} onOpenChange={setOpen}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent>
+        <DrawerHeader className="grid-flow-col grid-cols-[1fr_auto]">
+          <DrawerTitle>{item ? "Edit item" : "Add new item"}</DrawerTitle>
+          <DrawerDescription className="row-start-2">
+            {item ? `Editing ${item.name}` : "Add a new item to rank"}
+          </DrawerDescription>
+          {item && (
+            <DeleteItem className="col-start-2 row-span-2" itemId={item.id} />
+          )}
+        </DrawerHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DrawerHeader>
-              <DrawerTitle>{item ? "Edit item" : "Add new item"}</DrawerTitle>
-              <DrawerDescription>
-                {item ? `Editing ${item.name}` : "Add a new item to rank"}
-              </DrawerDescription>
-            </DrawerHeader>
-
             <div className="space-y-5 p-4 pt-0">
               <FormField
                 control={form.control}

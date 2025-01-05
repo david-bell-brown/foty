@@ -27,12 +27,11 @@ import {
 import { type Project, type RankingCategory } from "~/server/db/schema";
 import { projectFormSchema, type ProjectFormValues } from "~/lib/schemas";
 import { createProject, updateProject } from "~/server/actions/projects";
+import { DeleteProject } from "./delete-project";
 
 interface ProjectDrawerProps {
   project?: Project & { categories: RankingCategory[] };
-  trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  trigger: React.ReactNode;
 }
 
 export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
@@ -71,19 +70,24 @@ export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
     <Drawer open={open} onOpenChange={setOpen}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent>
+        <DrawerHeader className="grid-flow-col grid-cols-[1fr_auto]">
+          <DrawerTitle>
+            {project ? "Edit ranked list" : "Create ranked list"}
+          </DrawerTitle>
+          <DrawerDescription className="row-start-2">
+            {project
+              ? `Editing ${project.name}`
+              : "Add a new project with categories"}
+          </DrawerDescription>
+          {project && (
+            <DeleteProject
+              className="col-start-2 row-span-2"
+              projectId={project.id}
+            />
+          )}
+        </DrawerHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DrawerHeader>
-              <DrawerTitle>
-                {project ? "Edit ranked list" : "Create ranked list"}
-              </DrawerTitle>
-              <DrawerDescription className="">
-                {project
-                  ? `Editing ${project.name}`
-                  : "Add a new project with categories"}
-              </DrawerDescription>
-            </DrawerHeader>
-
             <div className="space-y-5 p-4 pt-0">
               <FormField
                 control={form.control}

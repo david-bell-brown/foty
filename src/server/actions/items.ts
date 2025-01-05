@@ -94,11 +94,14 @@ export async function deleteItem(id: string) {
     throw new Error("Unauthorized");
   }
 
-  const existingItem = await getItem(id);
+  const [deletedItem] = await db
+    .delete(items)
+    .where(and(eq(items.id, id), eq(items.userId, session.user.id)))
+    .returning();
 
-  if (!existingItem) {
-    throw new Error("Unauthorized");
+  if (!deletedItem) {
+    throw new Error("Failed to delete item");
   }
 
-  await db.delete(items).where(eq(items.id, id));
+  revalidatePath(`/projects/${deletedItem.projectId}`);
 }

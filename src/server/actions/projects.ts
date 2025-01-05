@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import {
@@ -166,15 +166,10 @@ export async function deleteProject(id: string) {
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
-  const project = await db.query.projects.findFirst({
-    where: eq(projects.id, id),
-  });
 
-  if (!project || project.userId !== session.user.id) {
-    throw new Error("Unauthorized");
-  }
-
-  await db.delete(projects).where(eq(projects.id, id));
+  await db
+    .delete(projects)
+    .where(and(eq(projects.id, id), eq(projects.userId, session.user.id)));
 
   revalidatePath("/");
   redirect("/");
