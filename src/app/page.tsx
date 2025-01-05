@@ -2,14 +2,14 @@ import { Button } from "~/components/ui/button";
 import { ProjectDrawer } from "~/components/project-drawer";
 import { ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
-import { db } from "~/server/db";
 import { auth } from "~/server/auth";
-import { Suspense } from "react";
+// import { Suspense } from "react";
+import { getUserProjects } from "~/server/queries";
 
 export const dynamic = "force-dynamic";
 
 async function ProjectList() {
-  const projects = await db.query.projects.findMany();
+  const projects = await getUserProjects();
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] justify-center gap-3">
       {projects.map((project) => (
@@ -29,7 +29,7 @@ export default async function HomePage() {
   const user = session?.user;
 
   return (
-    <div className="flex flex-1 flex-col gap-3 px-4">
+    <main className="flex flex-1 flex-col gap-3 px-4">
       {user ? (
         <>
           <ProjectDrawer
@@ -41,13 +41,13 @@ export default async function HomePage() {
             }
           />
           <hr />
-          <Suspense fallback={<div>Loading...</div>}>
-            <ProjectList />
-          </Suspense>
+          {/* <Suspense fallback={<div>Loading...</div>}> */}
+          <ProjectList />
+          {/* </Suspense> */}
         </>
       ) : (
         <div className="p-8 text-center">Please sign in above</div>
       )}
-    </div>
+    </main>
   );
 }
