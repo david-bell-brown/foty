@@ -29,6 +29,7 @@ import { createItem, updateItem } from "~/server/actions/items";
 import { Textarea } from "./ui/textarea";
 import { DeleteItem } from "./delete-item";
 import { toast } from "sonner";
+import { cn } from "~/lib/utils";
 
 interface ItemDrawerProps {
   projectId: string;
@@ -90,7 +91,12 @@ export function ItemDrawer({
     <Drawer open={open} onOpenChange={setOpen}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent>
-        <DrawerHeader className="grid-flow-col grid-cols-[1fr_auto]">
+        <DrawerHeader
+          className={cn(
+            "grid-flow-col grid-cols-[1fr_auto]",
+            item && "text-left",
+          )}
+        >
           <DrawerTitle>{item ? "Edit item" : "Add new item"}</DrawerTitle>
           <DrawerDescription className="row-start-2">
             {item ? `Editing ${item.name}` : "Add a new item to rank"}

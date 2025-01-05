@@ -123,3 +123,40 @@ export async function deleteItem(id: string) {
 
   revalidatePath(`/projects/${deletedItem.projectId}`);
 }
+
+export async function reorderItems(
+  values: { categoryId: string; itemId: string; projectId: string }[],
+) {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  const { success } = await ratelimit.limit(session.user.id);
+
+  if (!success) {
+    throw new Error("Rate limited");
+  }
+
+  const updatedRankings = (
+    await Promise.all(
+      values.map((value, index) =>
+        db
+          .update(itemRankings)
+          .set({
+            rank: index,
+          })
+          .where(
+            and(
+              eq(itemRankings.userId, session.user.id),
+              eq(itemRankings.categoryId, value.categoryId),
+              eq(itemRankings.itemId, value.itemId),
+            ),
+          )
+          .returning(),
+      ),
+    )
+  ).flat();
+
+  return updatedRankings;
+}

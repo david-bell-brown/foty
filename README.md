@@ -10,7 +10,7 @@
 - [x] create category
 - [ ] error management
 - [x] add item
-- [ ] delete project / items
+- [x] delete project / items
 - [ ] sort items and categories
-- [ ] rate limiting
+- [x] rate limiting
 - [ ] ui polish

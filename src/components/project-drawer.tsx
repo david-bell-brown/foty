@@ -29,6 +29,7 @@ import { projectFormSchema, type ProjectFormValues } from "~/lib/schemas";
 import { createProject, updateProject } from "~/server/actions/projects";
 import { DeleteProject } from "./delete-project";
 import { toast } from "sonner";
+import { cn } from "~/lib/utils";
 
 interface ProjectDrawerProps {
   project?: Project & { categories: RankingCategory[] };
@@ -89,7 +90,12 @@ export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
     <Drawer open={open} onOpenChange={setOpen}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent>
-        <DrawerHeader className="grid-flow-col grid-cols-[1fr_auto]">
+        <DrawerHeader
+          className={cn(
+            "grid-flow-col grid-cols-[1fr_auto]",
+            project && "text-left",
+          )}
+        >
           <DrawerTitle>
             {project ? "Edit ranked list" : "Create ranked list"}
           </DrawerTitle>
