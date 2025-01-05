@@ -79,12 +79,12 @@ export default function ItemList({
                   variant: "secondary",
                   size: "sm",
                 }),
-                "min-w-0 flex-1 justify-start rounded-br-none rounded-tr-none hover:bg-secondary",
+                "min-w-0 flex-1 justify-start gap-0 rounded-br-none rounded-tr-none pr-0 hover:bg-secondary",
               )}
             >
               <span className="flex-1 truncate">{ranking.item.name}</span>
-              <span className="drag-handle">
-                <Grip />
+              <span className="drag-handle flex h-9 items-center justify-center pl-6 pr-3">
+                <Grip className="size-4" />
               </span>
             </span>
             <ItemDrawer
