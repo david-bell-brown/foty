@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/button";
@@ -28,6 +28,7 @@ import { itemFormSchema, type ItemFormValues } from "~/lib/schemas";
 import { createItem, updateItem } from "~/server/actions/items";
 import { Textarea } from "./ui/textarea";
 import { DeleteItem } from "./delete-item";
+import { toast } from "sonner";
 
 interface ItemDrawerProps {
   projectId: string;
@@ -44,6 +45,13 @@ export function ItemDrawer({
 }: ItemDrawerProps) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => nameInputRef.current?.focus(), 100);
+    }
+  }, [open]);
 
   const { item, ...ranking } = itemRanking ?? { notes: null };
 
@@ -59,12 +67,22 @@ export function ItemDrawer({
 
   function onSubmit(values: ItemFormValues) {
     startTransition(async () => {
-      if (item) {
-        await updateItem(item.id, values);
-      } else {
-        await createItem(values);
+      try {
+        if (item) {
+          await updateItem(item.id, values);
+        } else {
+          await createItem(values);
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to save item");
+        }
+      } finally {
+        form.reset();
+        setOpen(false);
       }
-      setOpen(false);
     });
   }
 
@@ -90,7 +108,7 @@ export function ItemDrawer({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
-                    <FormControl>
+                    <FormControl ref={nameInputRef}>
                       <Input placeholder="Item name" {...field} />
                     </FormControl>
                     <FormMessage />

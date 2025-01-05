@@ -7,6 +7,7 @@ import Link from "next/link";
 import { SignIn } from "~/components/signin-button";
 import { UserMenu } from "~/components/user-menu";
 import { auth } from "~/server/auth";
+import { Toaster } from "sonner";
 
 async function Nav() {
   const session = await auth();
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className="flex h-full min-h-svh flex-col">
         <Nav />
         {children}
+        <Toaster />
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Plus, X } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +28,7 @@ import { type Project, type RankingCategory } from "~/server/db/schema";
 import { projectFormSchema, type ProjectFormValues } from "~/lib/schemas";
 import { createProject, updateProject } from "~/server/actions/projects";
 import { DeleteProject } from "./delete-project";
+import { toast } from "sonner";
 
 interface ProjectDrawerProps {
   project?: Project & { categories: RankingCategory[] };
@@ -37,6 +38,14 @@ interface ProjectDrawerProps {
 export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => nameInputRef.current?.focus(), 100);
+    }
+  }, [open]);
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
@@ -57,12 +66,22 @@ export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
 
   function onSubmit(values: ProjectFormValues) {
     startTransition(async () => {
-      if (project) {
-        await updateProject(project.id, values);
-      } else {
-        await createProject(values);
+      try {
+        if (project) {
+          await updateProject(project.id, values);
+        } else {
+          await createProject(values);
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to save item");
+        }
+      } finally {
+        form.reset();
+        setOpen(false);
       }
-      setOpen(false);
     });
   }
 
@@ -95,7 +114,7 @@ export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
-                    <FormControl>
+                    <FormControl ref={nameInputRef}>
                       <Input placeholder="Project name" {...field} />
                     </FormControl>
                     <FormMessage />
@@ -103,33 +122,39 @@ export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
                 )}
               />
 
-              <div className="space-y-4">
-                <FormLabel>Categories</FormLabel>
+              <fieldset role="group" className="space-y-4">
+                <FormLabel id="categories-label" htmlFor={undefined} asChild>
+                  <legend>Categories</legend>
+                </FormLabel>
                 {fields.map((field, index) => (
-                  <div key={field.id} className="flex gap-2">
-                    <FormField
-                      control={form.control}
-                      name={`categories.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input placeholder="Category name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => remove(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                  <FormField
+                    key={field.id}
+                    control={form.control}
+                    name={`categories.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem className="grid flex-1 grid-cols-[1fr_auto] gap-y-2 space-y-0">
+                        <FormLabel className="sr-only">
+                          Category {index + 1}
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Category name" {...field} />
+                        </FormControl>
+                        {fields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon"
+                            onClick={() => remove(index)}
+                            aria-label={`Remove category ${index + 1}`}
+                            className="ml-2"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <FormMessage className="col-span-2" />
+                      </FormItem>
                     )}
-                  </div>
+                  />
                 ))}
                 <Button
                   type="button"
@@ -140,7 +165,7 @@ export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
                   <Plus className="mr-2 h-4 w-4" />
                   Add category
                 </Button>
-              </div>
+              </fieldset>
             </div>
 
             <DrawerFooter>

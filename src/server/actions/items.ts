@@ -7,11 +7,18 @@ import { db } from "~/server/db";
 import { items, itemRankings, rankingCategories } from "~/server/db/schema";
 import { type ItemFormValues } from "~/lib/schemas";
 import { getItem, getProject } from "../queries";
+import { ratelimit } from "../ratelimit";
 
 export async function createItem(values: ItemFormValues) {
   const session = await auth();
   if (!session?.user) {
     throw new Error("Unauthorized");
+  }
+
+  const { success } = await ratelimit.limit(session.user.id);
+
+  if (!success) {
+    throw new Error("Rate limited");
   }
 
   const project = await getProject(values.projectId);
@@ -30,7 +37,6 @@ export async function createItem(values: ItemFormValues) {
     .insert(items)
     .values({
       name: values.name,
-      // description: values.description,
       projectId: values.projectId,
       userId: session.user.id,
     })
@@ -58,6 +64,12 @@ export async function updateItem(id: string, values: ItemFormValues) {
   const session = await auth();
   if (!session?.user) {
     throw new Error("Unauthorized");
+  }
+
+  const { success } = await ratelimit.limit(session.user.id);
+
+  if (!success) {
+    throw new Error("Rate limited");
   }
 
   const existingItem = await getItem(id);
@@ -92,6 +104,12 @@ export async function deleteItem(id: string) {
   const session = await auth();
   if (!session?.user) {
     throw new Error("Unauthorized");
+  }
+
+  const { success } = await ratelimit.limit(session.user.id);
+
+  if (!success) {
+    throw new Error("Rate limited");
   }
 
   const [deletedItem] = await db

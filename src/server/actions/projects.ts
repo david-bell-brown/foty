@@ -12,11 +12,18 @@ import {
   itemRankings,
 } from "~/server/db/schema";
 import { type ProjectFormValues } from "~/lib/schemas";
+import { ratelimit } from "../ratelimit";
 
 export async function createProject(values: ProjectFormValues) {
   const session = await auth();
   if (!session?.user) {
     throw new Error("Unauthorized");
+  }
+
+  const { success } = await ratelimit.limit(session.user.id);
+
+  if (!success) {
+    throw new Error("Rate limited");
   }
 
   const [project] = await db
@@ -48,6 +55,12 @@ export async function updateProject(id: string, values: ProjectFormValues) {
   const session = await auth();
   if (!session?.user) {
     throw new Error("Unauthorized");
+  }
+
+  const { success } = await ratelimit.limit(session.user.id);
+
+  if (!success) {
+    throw new Error("Rate limited");
   }
 
   const existingProject = await db.query.projects.findFirst({
@@ -165,6 +178,12 @@ export async function deleteProject(id: string) {
   const session = await auth();
   if (!session?.user) {
     throw new Error("Unauthorized");
+  }
+
+  const { success } = await ratelimit.limit(session.user.id);
+
+  if (!success) {
+    throw new Error("Rate limited");
   }
 
   await db
