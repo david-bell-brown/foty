@@ -19,7 +19,7 @@ async function ProjectHeader({ projectId }: { projectId: string }) {
     return notFound();
   }
   return (
-    <div className="flex items-center justify-between gap-2 px-4">
+    <div className="flex items-center justify-between gap-2 px-4 pr-0">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -36,7 +36,7 @@ async function ProjectHeader({ projectId }: { projectId: string }) {
       <ProjectDrawer
         project={{ ...project, categories: project.rankingCategories }}
         trigger={
-          <Button variant="ghost" className="gap-2">
+          <Button variant="link" className="gap-2">
             <Edit />
             Edit project
           </Button>

@@ -5,11 +5,11 @@
 - [x] basic ui for multiple sortable lists
 - [x] set up db
 - [x] attach db
-- [ ] add auth
-- [ ] user project id sub route
-- [ ] create category
+- [x] add auth
+- [x] user project id sub route
+- [x] create category
 - [ ] error management
-- [ ] add item
-- [ ] route to list
+- [x] add item
+- [ ] sort items and categories
 - [ ] rate limiting
 - [ ] ui polish

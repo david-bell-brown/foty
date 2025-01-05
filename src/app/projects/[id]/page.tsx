@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { getProject } from "~/server/queries";
+import { ItemDrawer } from "~/components/item-drawer";
+import { CirclePlus, Edit } from "lucide-react";
+import { Button, buttonVariants } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 async function Project({ projectId }: { projectId: string }) {
   const project = await getProject(projectId);
@@ -17,16 +21,58 @@ async function Project({ projectId }: { projectId: string }) {
           >
             <Card key={category.id} className="w-full">
               <CardHeader>
-                <CardTitle>{category.name}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{category.name}</CardTitle>
+                  <ItemDrawer
+                    projectId={project.id}
+                    categoryId={category.id}
+                    trigger={
+                      <Button size="sm" aria-label="Add item">
+                        <CirclePlus />
+                        Add item
+                      </Button>
+                    }
+                  />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-3">
-                  {project.items.map((item) => (
+                  {category.rankings.map((ranking, index) => (
                     <div
-                      key={item.id}
-                      className="mx-[-.75rem] rounded-lg bg-secondary px-3 py-2"
+                      key={ranking.itemId}
+                      className="ml-[-.25rem] flex items-center gap-2"
                     >
-                      {item.name}
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground">
+                        {index + 1}
+                      </span>
+                      <span className="flex min-w-0 flex-1 gap-[1px]">
+                        <span
+                          className={cn(
+                            buttonVariants({
+                              variant: "secondary",
+                              size: "sm",
+                            }),
+                            "min-w-0 flex-1 justify-start rounded-br-none rounded-tr-none hover:bg-secondary",
+                          )}
+                        >
+                          <span className="truncate">{ranking.item.name}</span>
+                        </span>
+                        <ItemDrawer
+                          projectId={project.id}
+                          categoryId={category.id}
+                          itemRanking={ranking}
+                          trigger={
+                            <Button
+                              aria-label="Edit item"
+                              size="sm"
+                              variant="secondary"
+                              className="rounded-bl-none rounded-tl-none"
+                            >
+                              <Edit />
+                            </Button>
+                          }
+                        />
+                      </span>
                     </div>
                   ))}
                 </div>

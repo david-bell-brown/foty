@@ -5,7 +5,12 @@ import { redirect } from "next/navigation";
 import { eq, inArray } from "drizzle-orm";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { projects, rankingCategories } from "~/server/db/schema";
+import {
+  projects,
+  rankingCategories,
+  items,
+  itemRankings,
+} from "~/server/db/schema";
 import { type ProjectFormValues } from "~/lib/schemas";
 
 export async function createProject(values: ProjectFormValues) {
@@ -120,15 +125,57 @@ export async function updateProject(id: string, values: ProjectFormValues) {
 
   // Insert new categories
   if (categoriesToInsert.length > 0) {
-    await db.insert(rankingCategories).values(
-      categoriesToInsert.map((cat) => ({
-        name: cat.name,
-        projectId: id,
-        orderIndex: cat.orderIndex,
+    const newCategories = await db
+      .insert(rankingCategories)
+      .values(
+        categoriesToInsert.map((cat) => ({
+          name: cat.name,
+          projectId: id,
+          orderIndex: cat.orderIndex,
+          userId: session.user.id,
+        })),
+      )
+      .returning();
+
+    // Get all existing items for this project
+    const existingItems = await db.query.items.findMany({
+      where: eq(items.projectId, id),
+    });
+
+    // Create rankings for each item in the new categories
+    const newRankings = existingItems.flatMap((item) =>
+      newCategories.map((category) => ({
+        itemId: item.id,
+        categoryId: category.id,
         userId: session.user.id,
+        notes: null,
+        rank: 0,
       })),
     );
+
+    if (newRankings.length > 0) {
+      await db.insert(itemRankings).values(newRankings);
+    }
   }
 
   revalidatePath(`/projects/${id}`);
+}
+
+export async function deleteProject(id: string) {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+  const project = await db.query.projects.findFirst({
+    where: eq(projects.id, id),
+  });
+
+  if (!project || project.userId !== session.user.id) {
+    throw new Error("Unauthorized");
+  }
+
+  await db.delete(projects).where(eq(projects.id, id));
+
+  revalidatePath("/");
+  redirect("/");
 }

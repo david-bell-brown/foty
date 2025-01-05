@@ -15,3 +15,12 @@ export const projectFormSchema = z.object({
 });
 
 export type ProjectFormValues = z.infer<typeof projectFormSchema>;
+
+export const itemFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  notes: z.string().optional(),
+  projectId: z.string(),
+  categoryId: z.string(),
+});
+
+export type ItemFormValues = z.infer<typeof itemFormSchema>;
