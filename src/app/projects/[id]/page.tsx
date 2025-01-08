@@ -6,6 +6,30 @@ import { CirclePlus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import ItemList from "~/components/item-list";
 
+const palettes = [
+  {}, // default primary
+  {
+    "--primary": "var(--palette-orange)",
+    "--primary-foreground": "var(--palette-orange-foreground)",
+  },
+  {
+    "--primary": "var(--palette-lime)",
+    "--primary-foreground": "var(--palette-lime-foreground)",
+  },
+  {
+    "--primary": "var(--palette-blue)",
+    "--primary-foreground": "var(--palette-blue-foreground)",
+  },
+  {
+    "--primary": "var(--palette-rose)",
+    "--primary-foreground": "var(--palette-rose-foreground)",
+  },
+  {
+    "--primary": "var(--palette-teal)",
+    "--primary-foreground": "var(--palette-teal-foreground)",
+  },
+] as const;
+
 async function Project({ projectId }: { projectId: string }) {
   const project = await getProject(projectId);
   if (!project) {
@@ -14,7 +38,7 @@ async function Project({ projectId }: { projectId: string }) {
   return (
     <main className="relative flex-1">
       <div className="absolute inset-0 flex w-full snap-x snap-mandatory overflow-x-auto">
-        {project.rankingCategories.map((category) => (
+        {project.rankingCategories.map((category, index) => (
           <div
             key={category.id}
             className="flex w-full shrink-0 snap-start p-2 md:w-6/12"
@@ -22,6 +46,7 @@ async function Project({ projectId }: { projectId: string }) {
             <Card
               key={category.id}
               className="flex w-full flex-col overflow-y-auto"
+              style={palettes[index % palettes.length] as React.CSSProperties}
             >
               <CardHeader className="sticky top-0 bg-card/50 pb-4 backdrop-blur-md">
                 <div className="flex items-center justify-between">

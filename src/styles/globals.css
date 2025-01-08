@@ -37,6 +37,21 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --palette-orange:  24.6 95% 53.1%;
+    --palette-orange-foreground: 33.3 100% 96.5%;
+
+    --palette-lime: 83.7 80.5% 44.3%;
+    --palette-lime-foreground: 78.3 92% 95.1%;
+  
+    --palette-teal: 174.7 83.9% 31.6%;
+    --palette-teal-foreground: 166.2 76.5% 96.7%;
+
+    --palette-blue: 217.2 91.2% 59.8%;
+    --palette-blue-foreground: 213.8 100% 96.9%;
+
+    --palette-rose: 346.8 77.2% 49.8%;
+    --palette-rose-foreground: 355.7 100% 97.3%;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -73,6 +88,21 @@
       --sidebar-accent-foreground: 240 4.8% 95.9%;
       --sidebar-border: 240 3.7% 15.9%;
       --sidebar-ring: 217.2 91.2% 59.8%;
+
+      --palette-orange:  27 96% 61%;
+      --palette-orange-foreground: 13 81.1% 14.5%;
+  
+      --palette-lime: 82.7 78% 55.5%;
+      --palette-lime-foreground: 89.3 80.4% 10%;
+    
+      --palette-teal: 172.5 66% 50.4%;
+      --palette-teal-foreground: 178.6 84.3% 10%;
+  
+      --palette-blue: 213.1 93.9% 67.8%;
+      --palette-blue-foreground: 226.2 57% 21%;
+  
+      --palette-rose: 351.3 94.5% 71.4%;
+      --palette-rose-foreground: 343.1 87.7% 15.9%;
     }
   }
 }
