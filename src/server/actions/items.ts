@@ -12,18 +12,18 @@ import { ratelimit } from "../ratelimit";
 export async function createItem(values: ItemFormValues) {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const { success } = await ratelimit.limit(session.user.id);
 
   if (!success) {
-    throw new Error("Rate limited");
+    return { error: "Rate limited" };
   }
 
   const project = await getProject(values.projectId);
   if (!project) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   // Get all categories for this project to create rankings
@@ -43,7 +43,7 @@ export async function createItem(values: ItemFormValues) {
     .returning();
 
   if (!item) {
-    throw new Error("Failed to create item");
+    return { error: "Failed to create item" };
   }
 
   // Create initial rankings for each category
@@ -58,24 +58,25 @@ export async function createItem(values: ItemFormValues) {
   );
 
   revalidatePath(`/projects/${values.projectId}`);
+  return { data: item };
 }
 
 export async function updateItem(id: string, values: ItemFormValues) {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const { success } = await ratelimit.limit(session.user.id);
 
   if (!success) {
-    throw new Error("Rate limited");
+    return { error: "Rate limited" };
   }
 
   const existingItem = await getItem(id);
 
   if (!existingItem) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   await db
@@ -98,18 +99,19 @@ export async function updateItem(id: string, values: ItemFormValues) {
     );
 
   revalidatePath(`/projects/${values.projectId}`);
+  return { data: { id } };
 }
 
 export async function deleteItem(id: string) {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const { success } = await ratelimit.limit(session.user.id);
 
   if (!success) {
-    throw new Error("Rate limited");
+    return { error: "Rate limited" };
   }
 
   const [deletedItem] = await db
@@ -118,10 +120,11 @@ export async function deleteItem(id: string) {
     .returning();
 
   if (!deletedItem) {
-    throw new Error("Failed to delete item");
+    return { error: "Failed to delete item" };
   }
 
   revalidatePath(`/projects/${deletedItem.projectId}`);
+  return { data: deletedItem };
 }
 
 export async function reorderItems(
@@ -129,13 +132,13 @@ export async function reorderItems(
 ) {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const { success } = await ratelimit.limit(session.user.id);
 
   if (!success) {
-    throw new Error("Rate limited");
+    return { error: "Rate limited" };
   }
 
   const updatedRankings = (
@@ -158,5 +161,5 @@ export async function reorderItems(
     )
   ).flat();
 
-  return updatedRankings;
+  return { data: updatedRankings };
 }

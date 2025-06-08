@@ -33,23 +33,17 @@ export default function ItemList({
 
   const handleUpdateList = useCallback(
     async (values: (ItemRanking & { item: Item })[]) => {
-      try {
-        await reorderItems(
-          values.map((v) => ({
-            categoryId: v.categoryId,
-            itemId: v.itemId,
-            projectId: v.item.projectId,
-          })),
-        );
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("Failed to reorder items");
-        }
-      } finally {
-        router.refresh();
+      const result = await reorderItems(
+        values.map((v) => ({
+          categoryId: v.categoryId,
+          itemId: v.itemId,
+          projectId: v.item.projectId,
+        })),
+      );
+      if (result.error) {
+        toast.error(result.error);
       }
+      router.refresh();
     },
     [router],
   );

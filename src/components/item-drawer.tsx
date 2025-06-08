@@ -68,19 +68,13 @@ export function ItemDrawer({
 
   function onSubmit(values: ItemFormValues) {
     startTransition(async () => {
-      try {
-        if (item) {
-          await updateItem(item.id, values);
-        } else {
-          await createItem(values);
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("Failed to save item");
-        }
-      } finally {
+      const result = item
+        ? await updateItem(item.id, values)
+        : await createItem(values);
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
         form.reset();
         setOpen(false);
       }

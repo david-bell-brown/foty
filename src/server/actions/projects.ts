@@ -17,13 +17,13 @@ import { ratelimit } from "../ratelimit";
 export async function createProject(values: ProjectFormValues) {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const { success } = await ratelimit.limit(session.user.id);
 
   if (!success) {
-    throw new Error("Rate limited");
+    return { error: "Rate limited" };
   }
 
   const [project] = await db
@@ -35,7 +35,7 @@ export async function createProject(values: ProjectFormValues) {
     .returning();
 
   if (!project) {
-    throw new Error("Failed to create project");
+    return { error: "Failed to create project" };
   }
 
   await db.insert(rankingCategories).values(
@@ -54,13 +54,13 @@ export async function createProject(values: ProjectFormValues) {
 export async function updateProject(id: string, values: ProjectFormValues) {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const { success } = await ratelimit.limit(session.user.id);
 
   if (!success) {
-    throw new Error("Rate limited");
+    return { error: "Rate limited" };
   }
 
   const existingProject = await db.query.projects.findFirst({
@@ -73,7 +73,7 @@ export async function updateProject(id: string, values: ProjectFormValues) {
   });
 
   if (!existingProject || existingProject.userId !== session.user.id) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   // Update project details
@@ -172,18 +172,19 @@ export async function updateProject(id: string, values: ProjectFormValues) {
   }
 
   revalidatePath(`/projects/${id}`);
+  return { data: { id } };
 }
 
 export async function deleteProject(id: string) {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const { success } = await ratelimit.limit(session.user.id);
 
   if (!success) {
-    throw new Error("Rate limited");
+    return { error: "Rate limited" };
   }
 
   await db

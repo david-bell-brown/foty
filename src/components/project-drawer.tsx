@@ -67,20 +67,13 @@ export function ProjectDrawer({ project, trigger }: ProjectDrawerProps) {
 
   function onSubmit(values: ProjectFormValues) {
     startTransition(async () => {
-      try {
-        if (project) {
-          await updateProject(project.id, values);
-        } else {
-          await createProject(values);
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("Failed to save item");
-        }
-      } finally {
-        form.reset();
+      const result = project
+        ? await updateProject(project.id, values)
+        : await createProject(values);
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
         setOpen(false);
       }
     });

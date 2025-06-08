@@ -14,6 +14,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { deleteItem } from "~/server/actions/items";
+import { toast } from "sonner";
 
 export function DeleteItem({
   itemId,
@@ -26,7 +27,10 @@ export function DeleteItem({
 
   function onDelete() {
     startTransition(async () => {
-      await deleteItem(itemId);
+      const result = await deleteItem(itemId);
+      if (result.error) {
+        toast.error(result.error);
+      }
     });
   }
 
