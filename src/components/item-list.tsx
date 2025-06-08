@@ -5,17 +5,19 @@ import { cn } from "~/lib/utils";
 import { type ItemRanking, type Item } from "~/server/db/schema";
 import { ItemDrawer } from "./item-drawer";
 import { buttonVariants, Button } from "./ui/button";
-import { handleEnd as coreHandleEnd } from "@formkit/drag-and-drop";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useCallback, useEffect } from "react";
 import { reorderItems } from "~/server/actions/items";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function ItemList({
   rankings,
 }: {
   rankings: (ItemRanking & { item: Item })[];
 }) {
+  const router = useRouter();
+
   const [parentRef, values, setValues] = useDragAndDrop<
     HTMLDivElement,
     ItemRanking & { item: Item }
@@ -24,37 +26,32 @@ export default function ItemList({
     synthDraggingClass: "bg-transparent opacity-80",
     synthDropZoneClass: "outline-2 outline-dashed outline-current rounded-md",
     nativeDrag: false,
-    handleEnd: (data) => {
-      coreHandleEnd(data);
-      void handleUpdateList(
-        values.map((v) => ({
-          categoryId: v.categoryId,
-          itemId: v.itemId,
-          projectId: v.item.projectId,
-        })),
-      );
+    onDragend: () => {
+      void handleUpdateList(values);
     },
   });
 
   const handleUpdateList = useCallback(
-    async (
-      values: {
-        categoryId: string;
-        itemId: string;
-        projectId: string;
-      }[],
-    ) => {
+    async (values: (ItemRanking & { item: Item })[]) => {
       try {
-        await reorderItems(values);
+        await reorderItems(
+          values.map((v) => ({
+            categoryId: v.categoryId,
+            itemId: v.itemId,
+            projectId: v.item.projectId,
+          })),
+        );
       } catch (error) {
         if (error instanceof Error) {
           toast.error(error.message);
         } else {
           toast.error("Failed to reorder items");
         }
+      } finally {
+        router.refresh();
       }
     },
-    [],
+    [router],
   );
 
   useEffect(() => {
