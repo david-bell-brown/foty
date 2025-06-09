@@ -1,0 +1,8 @@
+.dragging {
+  /* opacity: 0.8; */
+  background-color: transparent;
+  overflow: visible !important;
+}
+.dragging > * {
+  box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -6px rgba(0, 0, 0, 0.1);
+}

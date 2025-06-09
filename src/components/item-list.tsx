@@ -10,6 +10,7 @@ import { useCallback, useEffect } from "react";
 import { reorderItems } from "~/server/actions/items";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import styles from "./item-list.module.css";
 
 export default function ItemList({
   rankings,
@@ -23,9 +24,11 @@ export default function ItemList({
     ItemRanking & { item: Item }
   >(rankings, {
     dragHandle: ".drag-handle",
-    synthDraggingClass: "bg-transparent opacity-80",
-    synthDropZoneClass: "outline-2 outline-dashed outline-current rounded-md",
-    nativeDrag: false,
+    synthDraggingClass: styles.dragging,
+    dragPlaceholderClass:
+      "opacity-30 outline-2 outline-dashed outline-current rounded-md",
+    synthDragPlaceholderClass:
+      "opacity-30 outline-2 outline-dashed outline-current rounded-md",
     onDragend: () => {
       void handleUpdateList(values);
     },
@@ -63,7 +66,7 @@ export default function ItemList({
           <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground">
             {index + 1}
           </span>
-          <span className="flex min-w-0 flex-1 gap-[1px]">
+          <span className="flex min-w-0 flex-1 gap-[1px] rounded-md">
             <span
               className={cn(
                 buttonVariants({
@@ -74,7 +77,7 @@ export default function ItemList({
               )}
             >
               <span className="flex-1 truncate">{ranking.item.name}</span>
-              <span className="drag-handle flex h-9 items-center justify-center pl-6 pr-3">
+              <span className="drag-handle flex h-9 cursor-grab items-center justify-center pl-6 pr-3">
                 <Grip className="size-4" />
               </span>
             </span>

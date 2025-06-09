@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
-    "@formkit/drag-and-drop": "^0.3.1",
+    "@formkit/drag-and-drop": "^0.5.3",
     "@hookform/resolvers": "^3.9.1",
     "@neondatabase/serverless": "^0.10.4",
     "@radix-ui/react-alert-dialog": "^1.1.4",
