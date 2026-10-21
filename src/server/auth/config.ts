@@ -38,7 +38,11 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
-    DiscordProvider,
+    DiscordProvider({
+      // Discord returns iss=https://discord.com on the OAuth callback (RFC 9207).
+      // Auth.js otherwise checks that value against https://authjs.dev and rejects login.
+      issuer: "https://discord.com",
+    }),
     /**
      * ...add more providers here.
      *
