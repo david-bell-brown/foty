@@ -7,18 +7,11 @@ import { db } from "~/server/db";
 import { items, itemRankings, rankingCategories } from "~/server/db/schema";
 import { type ItemFormValues } from "~/lib/schemas";
 import { getItem, getProject } from "../queries";
-import { ratelimit } from "../ratelimit";
 
 export async function createItem(values: ItemFormValues) {
   const session = await auth();
   if (!session?.user) {
     return { error: "Unauthorized" };
-  }
-
-  const { success } = await ratelimit.limit(session.user.id);
-
-  if (!success) {
-    return { error: "Rate limited" };
   }
 
   const project = await getProject(values.projectId);
@@ -67,12 +60,6 @@ export async function updateItem(id: string, values: ItemFormValues) {
     return { error: "Unauthorized" };
   }
 
-  const { success } = await ratelimit.limit(session.user.id);
-
-  if (!success) {
-    return { error: "Rate limited" };
-  }
-
   const existingItem = await getItem(id);
 
   if (!existingItem) {
@@ -108,12 +95,6 @@ export async function deleteItem(id: string) {
     return { error: "Unauthorized" };
   }
 
-  const { success } = await ratelimit.limit(session.user.id);
-
-  if (!success) {
-    return { error: "Rate limited" };
-  }
-
   const [deletedItem] = await db
     .delete(items)
     .where(and(eq(items.id, id), eq(items.userId, session.user.id)))
@@ -133,12 +114,6 @@ export async function reorderItems(
   const session = await auth();
   if (!session?.user) {
     return { error: "Unauthorized" };
-  }
-
-  const { success } = await ratelimit.limit(session.user.id);
-
-  if (!success) {
-    return { error: "Rate limited" };
   }
 
   const updatedRankings = (
